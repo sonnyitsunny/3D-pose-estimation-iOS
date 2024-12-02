@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -16,44 +17,43 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="3D Pose Detection" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nCE-TX-h44">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="3D Pose Detection" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nCE-TX-h44">
                                 <rect key="frame" x="16" y="89" width="361" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="black" pointSize="20"/>
                                 <color key="textColor" name="AccentColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h06-U1-YaY">
-                                <rect key="frame" x="258" y="146" width="68" height="34.333333333333343"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="STOP"/>
-                                <connections>
-                                    <action selector="exitDetection:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8lL-8y-hi1"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dMN-2S-9N4">
-                                <rect key="frame" x="154" y="601" width="85" height="34.333333333333371"/>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dMN-2S-9N4">
+                                <rect key="frame" x="167.33333333333334" y="604.66666666666663" width="75.666666666666657" height="34.333333333333371"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="START"/>
                                 <connections>
-                                    <action selector="startDetection:" destination="BYZ-38-t0r" eventType="touchDown" id="mNG-nc-6eL"/>
+                                    <action selector="startDetection:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mxd-8b-hBS"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h06-U1-YaY">
+                                <rect key="frame" x="275" y="157" width="68" height="34.333333333333343"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="STOP"/>
+                                <connections>
+                                    <action selector="exitDetection:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Rqd-5t-wmJ"/>
                                 </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="h06-U1-YaY" firstAttribute="top" secondItem="nCE-TX-h44" secondAttribute="bottom" constant="33" id="DKF-yB-bnD"/>
-                            <constraint firstItem="nCE-TX-h44" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="30" id="PhY-6M-3Ps"/>
-                            <constraint firstItem="dMN-2S-9N4" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="150" id="Tn0-hb-yKz"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="dMN-2S-9N4" secondAttribute="trailing" constant="150" id="U3g-LC-Wws"/>
-                            <constraint firstItem="nCE-TX-h44" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="64" id="eE2-rh-FPG"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="h06-U1-YaY" secondAttribute="trailing" constant="67" id="qfr-Z9-ynn"/>
-                            <constraint firstItem="dMN-2S-9N4" firstAttribute="top" secondItem="nCE-TX-h44" secondAttribute="bottom" constant="491.67000000000002" id="vCE-Bi-kaY"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="nCE-TX-h44" secondAttribute="trailing" constant="64" id="w8O-N5-DoW"/>
+                            <constraint firstItem="h06-U1-YaY" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="258" id="6nc-LF-RoI"/>
+                            <constraint firstItem="dMN-2S-9N4" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="167.33333333333337" id="O3G-zI-TTh"/>
+                            <constraint firstItem="nCE-TX-h44" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="UZc-uC-5QJ"/>
+                            <constraint firstItem="h06-U1-YaY" firstAttribute="top" secondItem="nCE-TX-h44" secondAttribute="bottom" constant="33" id="fEu-dH-UbR"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="dMN-2S-9N4" secondAttribute="bottom" constant="179.00000000000011" id="l6H-Ma-WEN"/>
+                            <constraint firstItem="nCE-TX-h44" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="laG-hb-khi"/>
+                            <constraint firstItem="nCE-TX-h44" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="30" id="tlc-Eo-g7g"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="projectName" destination="nCE-TX-h44" id="bBe-PD-sJF"/>
+                        <outlet property="projectName" destination="nCE-TX-h44" id="UtZ-dY-4QY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

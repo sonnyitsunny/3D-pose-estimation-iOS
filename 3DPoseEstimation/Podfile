@@ -1,0 +1,7 @@
+platform :ios, '15.0'
+target '3DPoseEstimation' do
+  use_frameworks!
+  pod 'TensorFlowLiteSwift'
+  pod 'TensorFlowLiteC'
+  pod 'TensorFlowLiteSwift', '~> 2.13.0', :subspecs => ['CoreML', 'Metal']
+end

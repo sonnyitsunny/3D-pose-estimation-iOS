@@ -1,46 +1,22 @@
-//
-//  ViewController.swift
-//  3DPoseEstimation
-//
-//  Created by 손동현 on 10/15/24.
-//
-
 import UIKit
 import AVFoundation
 
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+    @IBOutlet weak var projectName: UILabel!
 
     var captureSession: AVCaptureSession?
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-
-    @IBOutlet weak var projectName: UILabel!
-
-    @IBAction func exitDetection(_ sender: UIButton) {
-        print("종료")
-        captureSession?.stopRunning()
-
-        // 카메라 미리보기 레이어를 뷰에서 제거
-        videoPreviewLayer?.removeFromSuperlayer()
-
-    }
-
-
+    var isProcessingFrame = false
+    var isDetectionActive = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupCamera()
+        setupCameraSession()
     }
 
-    @IBAction func startDetection(_ sender: UIButton) {
-        print("시작 버튼 누름")
-        captureSession?.startRunning()
-
-        
-    }
-
-    func setupCamera() {
+    func setupCameraSession() {
         captureSession = AVCaptureSession()
-        captureSession?.sessionPreset = .high
+        guard let captureSession = captureSession else { return }
 
         guard let backCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
             print("후방 카메라를 찾을 수 없습니다.")
@@ -49,36 +25,142 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 
         do {
             let input = try AVCaptureDeviceInput(device: backCamera)
-            captureSession?.addInput(input)
-
-            let videoOutput = AVCaptureVideoDataOutput()
-            videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
-            captureSession?.addOutput(videoOutput)
-
-            videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession!)
-            videoPreviewLayer?.videoGravity = .resizeAspectFill
-
-            // 화면 가운데에 작은 사각형을 지정
-            let previewWidth: CGFloat = 300 // 원하는 너비
-            let previewHeight: CGFloat = 300 // 원하는 높이
-            let xPos = (view.bounds.width - previewWidth) / 2
-            let yPos = (view.bounds.height - previewHeight) / 2
-
-            // 가운데에 위치하도록 레이어 크기 조정
-            videoPreviewLayer?.frame = CGRect(x: xPos, y: yPos, width: previewWidth, height: previewHeight)
-
-            view.layer.insertSublayer(videoPreviewLayer!, at: 0)
-
-
-
+            if captureSession.canAddInput(input) {
+                captureSession.addInput(input)
+            }
         } catch {
-            print("카메라 설정 중 오류 발생: \(error)")
+            print("카메라 입력 설정 오류: \(error.localizedDescription)")
+            return
+        }
+
+        let videoOutput = AVCaptureVideoDataOutput()
+        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+        }
+
+        // 연결의 방향 설정
+        if let connection = videoOutput.connection(with: .video) {
+            connection.videoOrientation = .portrait
+        }
+
+        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        if let videoPreviewLayer = videoPreviewLayer {
+            videoPreviewLayer.videoGravity = .resizeAspectFill
+            videoPreviewLayer.frame = view.layer.bounds
+            view.layer.insertSublayer(videoPreviewLayer, at: 0)
+        }
+
+        captureSession.startRunning()
+    }
+
+    @IBAction func startDetection(_ sender: UIButton) {
+        print("Detection started")
+        isDetectionActive = true
+        isProcessingFrame = false
+    }
+
+    @IBAction func exitDetection(_ sender: UIButton) {
+        print("Detection stopped")
+        isDetectionActive = false
+        isProcessingFrame = true
+
+        if let imageView = view.viewWithTag(101) {
+            imageView.removeFromSuperview()
         }
     }
 
-    // AVCaptureVideoDataOutputSampleBufferDelegate 메서드
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // 실시간 프레임 처리
+        if isProcessingFrame || !isDetectionActive { return }
+
+        isProcessingFrame = true
+
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            isProcessingFrame = false
+            return
+        }
+
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        let uiImage = UIImage(ciImage: ciImage).fixedOrientation() // 이미지 회전 수정
+
+        guard let jpegData = uiImage.jpegData(compressionQuality: 0.8) else {
+            isProcessingFrame = false
+            return
+        }
+
+        sendImageToServer(imageData: jpegData) {
+            self.isProcessingFrame = false
+        }
+    }
+
+    func sendImageToServer(imageData: Data, completion: @escaping () -> Void) {
+        let urlString = "http://192.168.0.34:8000/process-frame/"
+        guard let url = URL(string: urlString) else {
+            print("잘못된 서버 URL입니다.")
+            completion()
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"frame.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            defer { completion() }
+            if let error = error {
+                print("서버 요청 오류: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("서버에서 데이터가 반환되지 않았습니다.")
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.displaySkeletonImage(imageData: data)
+            }
+        }
+        task.resume()
+    }
+
+    func displaySkeletonImage(imageData: Data) {
+        if let imageView = view.viewWithTag(101) {
+            imageView.removeFromSuperview()
+        }
+
+        guard let skeletonImage = UIImage(data: imageData) else {
+            print("수신된 데이터를 이미지로 변환하는 데 실패했습니다.")
+            return
+        }
+
+        let imageView = UIImageView(image: skeletonImage)
+        imageView.contentMode = .scaleAspectFit
+        imageView.tag = 101
+        imageView.frame = view.bounds
+        view.addSubview(imageView)
     }
 }
 
+// UIImage 방향 수정 확장
+extension UIImage {
+    func fixedOrientation() -> UIImage {
+        if imageOrientation == .up {
+            return self
+        }
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(in: CGRect(origin: .zero, size: size))
+        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return normalizedImage
+    }
+}
