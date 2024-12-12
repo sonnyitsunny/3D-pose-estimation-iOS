@@ -51,7 +51,10 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             view.layer.insertSublayer(videoPreviewLayer, at: 0)
         }
 
-        captureSession.startRunning()
+        // `startRunning`을 백그라운드 스레드에서 실행
+        DispatchQueue.global(qos: .userInitiated).async {
+            captureSession.startRunning()
+        }
     }
 
     @IBAction func startDetection(_ sender: UIButton) {
@@ -94,7 +97,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
 
     func sendImageToServer(imageData: Data, completion: @escaping () -> Void) {
-        let urlString = "http://192.168.0.34:8000/process-frame/"
+        let urlString = "http://192.168.0.2:8000/process-frame/"
         guard let url = URL(string: urlString) else {
             print("잘못된 서버 URL입니다.")
             completion()
@@ -144,10 +147,23 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         }
 
         let imageView = UIImageView(image: skeletonImage)
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill // 화면을 완전히 채우도록 설정
         imageView.tag = 101
+        imageView.clipsToBounds = true // 이미지가 화면 경계를 넘지 않도록 자르기
+        // 화면 전체 크기에 맞게 설정
         imageView.frame = view.bounds
         view.addSubview(imageView)
+
+        // 버튼과 레이블을 최상단으로 가져오기
+        view.bringSubviewToFront(projectName)
+        if let startButton = view.viewWithTag(201) {
+            view.bringSubviewToFront(startButton) // startDetection 버튼 앞으로 가져오기
+        }
+        if let stopButton = view.viewWithTag(202) {
+            view.bringSubviewToFront(stopButton) // exitDetection 버튼 앞으로 가져오기
+        }
+
+
     }
 }
 
