@@ -6,6 +6,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -17,7 +18,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pose Detection" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nCE-TX-h44">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Leg Condition Diagnosis " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nCE-TX-h44">
                                 <rect key="frame" x="16" y="89" width="361" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="black" pointSize="20"/>
                                 <color key="textColor" name="AccentColor"/>
@@ -39,11 +40,19 @@
                                     <action selector="exitDetection:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Rqd-5t-wmJ"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="condition" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5yA-Wi-VrE">
+                                <rect key="frame" x="16" y="712" width="361" height="26.333333333333371"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <color key="textColor" systemColor="systemRedColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="h06-U1-YaY" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="258" id="6nc-LF-RoI"/>
+                            <constraint firstItem="5yA-Wi-VrE" firstAttribute="trailing" secondItem="nCE-TX-h44" secondAttribute="trailing" id="8To-JH-KUG"/>
+                            <constraint firstItem="5yA-Wi-VrE" firstAttribute="leading" secondItem="nCE-TX-h44" secondAttribute="leading" id="8lv-vT-MAB"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="h06-U1-YaY" secondAttribute="trailing" constant="54" id="8nz-Nm-BKu"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="dMN-2S-9N4" secondAttribute="trailing" constant="140" id="LRc-NH-IeY"/>
                             <constraint firstItem="dMN-2S-9N4" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="140" id="O3G-zI-TTh"/>
@@ -51,11 +60,13 @@
                             <constraint firstItem="h06-U1-YaY" firstAttribute="top" secondItem="nCE-TX-h44" secondAttribute="bottom" constant="33" id="fEu-dH-UbR"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="dMN-2S-9N4" secondAttribute="bottom" constant="180" id="l6H-Ma-WEN"/>
                             <constraint firstItem="nCE-TX-h44" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="laG-hb-khi"/>
+                            <constraint firstItem="5yA-Wi-VrE" firstAttribute="top" secondItem="dMN-2S-9N4" secondAttribute="bottom" constant="74" id="ogJ-0o-GNQ"/>
                             <constraint firstItem="nCE-TX-h44" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="30" id="tlc-Eo-g7g"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="projectName" destination="nCE-TX-h44" id="UtZ-dY-4QY"/>
+                        <outlet property="statusLabel" destination="5yA-Wi-VrE" id="smS-y2-fM1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -67,5 +78,8 @@
         <namedColor name="AccentColor">
             <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
     </resources>
 </document>

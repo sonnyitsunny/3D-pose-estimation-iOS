@@ -3,6 +3,7 @@ import AVFoundation
 
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     @IBOutlet weak var projectName: UILabel!
+    @IBOutlet weak var statusLabel: UILabel! // 상태 메시지를 표시하는 UILabel 추가
 
     var captureSession: AVCaptureSession?
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
@@ -39,7 +40,6 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             captureSession.addOutput(videoOutput)
         }
 
-        // 연결의 방향 설정
         if let connection = videoOutput.connection(with: .video) {
             connection.videoOrientation = .portrait
         }
@@ -51,7 +51,6 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             view.layer.insertSublayer(videoPreviewLayer, at: 0)
         }
 
-        // `startRunning`을 백그라운드 스레드에서 실행
         DispatchQueue.global(qos: .userInitiated).async {
             captureSession.startRunning()
         }
@@ -84,7 +83,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         }
 
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        let uiImage = UIImage(ciImage: ciImage).fixedOrientation() // 이미지 회전 수정
+        let uiImage = UIImage(ciImage: ciImage).fixedOrientation()
 
         guard let jpegData = uiImage.jpegData(compressionQuality: 0.8) else {
             isProcessingFrame = false
@@ -97,7 +96,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
 
     func sendImageToServer(imageData: Data, completion: @escaping () -> Void) {
-        let urlString = "http://192.168.0.2:8000/process-frame/"
+        let urlString = "http://192.168.45.26:8000/process-frame/"
         guard let url = URL(string: urlString) else {
             print("잘못된 서버 URL입니다.")
             completion()
@@ -124,19 +123,24 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 return
             }
 
-            guard let data = data else {
-                print("서버에서 데이터가 반환되지 않았습니다.")
+            guard let data = data,
+                  let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []),
+                  let jsonDict = jsonResponse as? [String: Any],
+                  let imageHex = jsonDict["image"] as? String,
+                  let analysis = jsonDict["analysis"] as? [[String: String]],
+                  let imageData = Data(hexString: imageHex) else {
+                print("서버 응답 처리 실패")
                 return
             }
 
             DispatchQueue.main.async {
-                self.displaySkeletonImage(imageData: data)
+                self.updateUI(imageData: imageData, analysis: analysis)
             }
         }
         task.resume()
     }
 
-    func displaySkeletonImage(imageData: Data) {
+    func updateUI(imageData: Data, analysis: [[String: String]]) {
         if let imageView = view.viewWithTag(101) {
             imageView.removeFromSuperview()
         }
@@ -147,15 +151,17 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         }
 
         let imageView = UIImageView(image: skeletonImage)
-        imageView.contentMode = .scaleAspectFill // 화면을 완전히 채우도록 설정
+        imageView.contentMode = .scaleAspectFill
         imageView.tag = 101
-        imageView.clipsToBounds = true // 이미지가 화면 경계를 넘지 않도록 자르기
-        // 화면 전체 크기에 맞게 설정
+        imageView.clipsToBounds = true
         imageView.frame = view.bounds
         view.addSubview(imageView)
 
-        // 버튼과 레이블을 최상단으로 가져오기
         view.bringSubviewToFront(projectName)
+
+        // 버튼과 레이블을 최상단으로 가져오기
+
+        view.bringSubviewToFront(statusLabel)
         if let startButton = view.viewWithTag(201) {
             view.bringSubviewToFront(startButton) // startDetection 버튼 앞으로 가져오기
         }
@@ -163,7 +169,36 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             view.bringSubviewToFront(stopButton) // exitDetection 버튼 앞으로 가져오기
         }
 
+        statusLabel.numberOfLines = 0
+        statusLabel.lineBreakMode = .byWordWrapping
+        statusLabel.textAlignment = .center // 필요에 따라 변경
 
+        // 분석 결과 업데이트
+        var statusText = ""
+        for result in analysis {
+            if let overallStatus = result["overall_status"] {
+                statusText += "\(overallStatus)\n"
+            }
+        }
+        statusLabel.text = statusText
+    }
+}
+
+// Hex 문자열을 Data로 변환
+extension Data {
+    init?(hexString: String) {
+        var data = Data()
+        var temp = ""
+        for char in hexString {
+            temp.append(char)
+            if temp.count == 2 {
+                if let byte = UInt8(temp, radix: 16) {
+                    data.append(byte)
+                }
+                temp = ""
+            }
+        }
+        self = data
     }
 }
 
